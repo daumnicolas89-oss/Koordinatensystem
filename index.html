@@ -1,0 +1,1104 @@
+<meta charset="utf-8">
+<title>Ferien-Koordinaten</title>
+
+<style>
+  /* -- Tokens -------------------------------------------------------------
+     Light is the base. Dark is redefined twice: once for the OS setting
+     (guarded so an explicit light stamp wins) and once for the theme stamp. */
+  :root {
+    color-scheme: light;
+
+    --paper:        #f2f5f3;
+    --surface:      #fcfdfb;
+    --surface-2:    #eaefec;
+    --hairline:     rgba(20, 24, 26, 0.10);
+    --hairline-2:   rgba(20, 24, 26, 0.06);
+
+    --ink:          #14181a;
+    --ink-2:        #4e565a;
+    --ink-muted:    #7d878b;
+
+    --grid:         #e2e8e5;
+    --grid-major:   #c7d1cd;
+    --axis:         #b3bfbb;
+
+    --accent:       #0e4f5c;
+    --accent-ink:   #ffffff;
+    --accent-soft:  rgba(14, 79, 92, 0.10);
+
+    /* Mark fills encode the quadrant, not series identity. */
+    --m-act:        #d03b3b;  --m-act-fg:  #ffffff;
+    --m-keep:       #0ca30c;  --m-keep-fg: #ffffff;
+    --m-over:       #fab219;  --m-over-fg: #191a17;
+    --m-low:        #5f6e75;  --m-low-fg:  #ffffff;
+
+    --tint-act:     rgba(208, 59, 59, 0.055);
+    --tint-keep:    rgba(12, 163, 12, 0.040);
+    --tint-over:    rgba(250, 178, 25, 0.045);
+    --tint-low:     rgba(95, 110, 117, 0.030);
+
+    --font-display: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --font-ui:      system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+    --r:            10px;
+    --shadow:       0 1px 2px rgba(20, 24, 26, .05), 0 8px 24px -12px rgba(20, 24, 26, .18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+
+      --paper:      #0e1113;
+      --surface:    #171b1e;
+      --surface-2:  #1f2529;
+      --hairline:   rgba(242, 245, 243, 0.12);
+      --hairline-2: rgba(242, 245, 243, 0.07);
+
+      --ink:        #f2f5f3;
+      --ink-2:      #b6bfc0;
+      --ink-muted:  #8b9498;
+
+      --grid:       #262d30;
+      --grid-major: #384347;
+      --axis:       #465358;
+
+      --accent:     #4fc4c9;
+      --accent-ink: #08191c;
+      --accent-soft: rgba(79, 196, 201, 0.14);
+
+      --m-low:      #8b9aa1;  --m-low-fg: #0e1113;
+
+      --tint-act:   rgba(208, 59, 59, 0.10);
+      --tint-keep:  rgba(12, 163, 12, 0.09);
+      --tint-over:  rgba(250, 178, 25, 0.08);
+      --tint-low:   rgba(139, 154, 161, 0.05);
+
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --paper:      #0e1113;
+    --surface:    #171b1e;
+    --surface-2:  #1f2529;
+    --hairline:   rgba(242, 245, 243, 0.12);
+    --hairline-2: rgba(242, 245, 243, 0.07);
+
+    --ink:        #f2f5f3;
+    --ink-2:      #b6bfc0;
+    --ink-muted:  #8b9498;
+
+    --grid:       #262d30;
+    --grid-major: #384347;
+    --axis:       #465358;
+
+    --accent:     #4fc4c9;
+    --accent-ink: #08191c;
+    --accent-soft: rgba(79, 196, 201, 0.14);
+
+    --m-low:      #8b9aa1;  --m-low-fg: #0e1113;
+
+    --tint-act:   rgba(208, 59, 59, 0.10);
+    --tint-keep:  rgba(12, 163, 12, 0.09);
+    --tint-over:  rgba(250, 178, 25, 0.08);
+    --tint-low:   rgba(139, 154, 161, 0.05);
+
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+  }
+
+  /* -- Frame ------------------------------------------------------------ */
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: clamp(14px, 0.95vw, 19px);
+    line-height: 1.45;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .app {
+    height: 100dvh;
+    min-height: 560px;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  /* -- Top bar ---------------------------------------------------------- */
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 0.7rem clamp(0.8rem, 1.4vw, 1.6rem);
+    background: var(--surface);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .brand { display: flex; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
+
+  .brand h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 1.5vw, 1.6rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .brand p {
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 0.82em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .bar-tools { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+  .count {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+    font-size: 0.88em;
+    padding-right: 0.4rem;
+    white-space: nowrap;
+  }
+  .count b { color: var(--ink); font-weight: 650; }
+
+  button {
+    font: inherit;
+    font-size: 0.88em;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r);
+    padding: 0.5em 0.9em;
+    cursor: pointer;
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
+  }
+  button:hover:not(:disabled) { background: var(--surface-2); }
+  button:disabled { opacity: .4; cursor: default; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  button[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  button.primary:hover:not(:disabled) { filter: brightness(1.08); background: var(--accent); }
+
+  /* -- Main split ------------------------------------------------------- */
+  main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(260px, 23vw, 380px);
+    min-height: 0;
+  }
+
+  .stage {
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    padding: clamp(0.5rem, 1vw, 1rem);
+    gap: 0.5rem;
+  }
+
+  .plot-box {
+    min-height: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  svg.plot {
+    width: 100%;
+    height: 100%;
+    max-width: min(100%, calc(100dvh - 9rem));
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    display: block;
+  }
+
+  .hint {
+    text-align: center;
+    color: var(--ink-muted);
+    font-size: 0.84em;
+  }
+  .hint kbd {
+    font: inherit;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline-2);
+    border-radius: 5px;
+    padding: 0.1em 0.4em;
+  }
+
+  /* -- Plot internals --------------------------------------------------- */
+  .grid-line   { stroke: var(--grid); stroke-width: 1; }
+  .grid-major  { stroke: var(--grid-major); stroke-width: 1; }
+  .axis-line   { stroke: var(--axis); stroke-width: 2; }
+  .plot-frame  { fill: var(--surface); stroke: var(--hairline); stroke-width: 1; }
+
+  .tick {
+    fill: var(--ink-muted);
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+  }
+  .axis-title {
+    fill: var(--ink-2);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .axis-anchor {
+    fill: var(--ink-muted);
+    font-size: 14.5px;
+    letter-spacing: 0.04em;
+  }
+  .quad-cap {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-style: italic;
+    fill: var(--ink-muted);
+  }
+
+  .q-act  { fill: var(--tint-act); }
+  .q-keep { fill: var(--tint-keep); }
+  .q-over { fill: var(--tint-over); }
+  .q-low  { fill: var(--tint-low); }
+
+  .halo { fill: currentColor; opacity: 0.13; pointer-events: none; }
+  .vote { fill: currentColor; opacity: 0.45; }
+  .leader { stroke: currentColor; stroke-width: 1.5; opacity: 0.3; }
+
+  .dot {
+    stroke: var(--surface);
+    stroke-width: 2.5;
+    fill: currentColor;
+    cursor: grab;
+  }
+  .mark.dragging .dot { cursor: grabbing; }
+  .mark.active .dot { stroke: var(--accent); stroke-width: 3.5; }
+
+  .badge {
+    font-size: 15px;
+    font-weight: 700;
+    text-anchor: middle;
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .label {
+    font-size: 16px;
+    font-weight: 600;
+    fill: var(--ink);
+    pointer-events: none;
+    paint-order: stroke;
+    stroke: var(--surface);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+  }
+  .label tspan.val {
+    fill: var(--ink-muted);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .is-act  { color: var(--m-act); }
+  .is-keep { color: var(--m-keep); }
+  .is-over { color: var(--m-over); }
+  .is-low  { color: var(--m-low); }
+
+  .badge.is-act  { fill: var(--m-act-fg); }
+  .badge.is-keep { fill: var(--m-keep-fg); }
+  .badge.is-over { fill: var(--m-over-fg); }
+  .badge.is-low  { fill: var(--m-low-fg); }
+
+  /* -- Rail ------------------------------------------------------------- */
+  .rail {
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    background: var(--surface);
+    border-left: 1px solid var(--hairline);
+  }
+
+  .rail-head {
+    padding: 0.85rem clamp(0.7rem, 1vw, 1.1rem) 0.5rem;
+    border-bottom: 1px solid var(--hairline-2);
+  }
+  .rail-head h2 {
+    margin: 0 0 0.15rem;
+    font-size: 0.78em;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-weight: 650;
+  }
+  .rail-head p { margin: 0; color: var(--ink-2); font-size: 0.86em; }
+
+  .crits {
+    list-style: none;
+    margin: 0;
+    padding: 0.4rem clamp(0.5rem, 0.8vw, 0.8rem) 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+  }
+
+  .crit {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.5rem 0.55rem;
+    border: 1px solid transparent;
+    border-radius: var(--r);
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    background: transparent;
+    color: var(--ink);
+  }
+  .crit:hover { background: var(--surface-2); }
+  .crit[aria-current="true"] {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .crit:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .crit .num {
+    width: 1.9em;
+    height: 1.9em;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 0.86em;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    background: var(--surface-2);
+    color: var(--ink-muted);
+    border: 1px dashed var(--hairline);
+  }
+  .crit.done .num { border-style: solid; border-color: transparent; }
+  .crit.done .num.is-act  { background: var(--m-act);  color: var(--m-act-fg); }
+  .crit.done .num.is-keep { background: var(--m-keep); color: var(--m-keep-fg); }
+  .crit.done .num.is-over { background: var(--m-over); color: var(--m-over-fg); }
+  .crit.done .num.is-low  { background: var(--m-low);  color: var(--m-low-fg); }
+
+  .crit .body { min-width: 0; }
+  .crit .name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.97em;
+    line-height: 1.25;
+  }
+  .crit .meta {
+    display: block;
+    font-size: 0.8em;
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+    margin-top: 0.1rem;
+  }
+
+  .crit .clear {
+    border: 0;
+    background: transparent;
+    color: var(--ink-muted);
+    padding: 0.25em 0.4em;
+    border-radius: 6px;
+    font-size: 1em;
+    line-height: 1;
+    visibility: hidden;
+  }
+  .crit.done .clear { visibility: visible; }
+  .crit .clear:hover { background: var(--surface-2); color: var(--ink); }
+
+  /* -- Report overlay --------------------------------------------------- */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: color-mix(in srgb, var(--paper) 78%, transparent);
+    backdrop-filter: blur(6px);
+    display: grid;
+    place-items: center;
+    padding: clamp(1rem, 3vw, 3rem);
+    z-index: 20;
+  }
+  .overlay[hidden] { display: none; }
+
+  .sheet {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    width: min(760px, 100%);
+    max-height: 100%;
+    overflow: auto;
+    padding: clamp(1.2rem, 2.2vw, 2rem);
+  }
+  .sheet h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 2vw, 1.75rem);
+    margin: 0 0 0.2rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .sheet .lede { margin: 0 0 1.3rem; color: var(--ink-2); font-size: 0.92em; }
+
+  .rank { list-style: none; margin: 0 0 1.4rem; padding: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+  .rank li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.55rem 0.2rem;
+    border-bottom: 1px solid var(--hairline-2);
+  }
+  .rank li:last-child { border-bottom: 0; }
+  .rank .pos {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-muted);
+    font-size: 0.85em;
+    width: 1.4em;
+  }
+  .rank .nm { font-weight: 600; }
+  .rank .sub { display: block; font-size: 0.8em; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  .chip {
+    font-size: 0.76em;
+    font-weight: 650;
+    padding: 0.25em 0.65em;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .chip.is-act  { background: var(--m-act);  color: var(--m-act-fg); }
+  .chip.is-keep { background: var(--m-keep); color: var(--m-keep-fg); }
+  .chip.is-over { background: var(--m-over); color: var(--m-over-fg); }
+  .chip.is-low  { background: var(--m-low);  color: var(--m-low-fg); }
+
+  .sheet-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .empty { color: var(--ink-muted); font-style: italic; padding: 1rem 0 1.4rem; }
+
+  /* -- Narrow / portrait boards ----------------------------------------- */
+  @media (max-width: 900px), (orientation: portrait) and (max-width: 1100px) {
+    .app { height: auto; min-height: 100dvh; }
+    main { grid-template-columns: minmax(0, 1fr); }
+    .rail { border-left: 0; border-top: 1px solid var(--hairline); }
+    .crits { max-height: none; overflow: visible; }
+    svg.plot { max-width: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  @media print {
+    .bar-tools, .rail, .hint, .overlay { display: none !important; }
+    body { background: #fff; }
+  }
+</style>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <h1>Ferien-Koordinaten</h1>
+      <p>R&#xfc;ckblick Ferienbetreuung</p>
+    </div>
+    <div class="bar-tools">
+      <span class="count" id="count"></span>
+      <button id="t-votes" aria-pressed="false" title="Alle Einzelstimmen dauerhaft einblenden">Einzelstimmen</button>
+      <button id="t-labels" aria-pressed="true" title="Namen an den Punkten ein-/ausblenden">Namen</button>
+      <button id="undo" title="Letzte Eingabe r&#xfc;ckg&#xe4;ngig">Zur&#xfc;ck</button>
+      <button id="open-report" class="primary">Auswertung</button>
+      <button id="reset" title="Alle Eingaben l&#xf6;schen">Neu</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <div class="plot-box">
+        <svg class="plot" id="plot" viewBox="0 0 840 840" role="img"
+             aria-label="Koordinatensystem: waagerecht die Wichtigkeit f&#xfc;r die eigene Arbeit, senkrecht wie gut es geklappt hat, jeweils 0 bis 10."></svg>
+      </div>
+      <p class="hint" id="hint"></p>
+    </section>
+
+    <aside class="rail">
+      <div class="rail-head">
+        <h2>Kriterien</h2>
+        <p id="rail-sub">Kriterium w&#xe4;hlen, dann in die Fl&#xe4;che tippen.</p>
+      </div>
+      <ol class="crits" id="crits"></ol>
+    </aside>
+  </main>
+</div>
+
+<div class="overlay" id="report" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="report-title">
+    <h2 id="report-title">Auswertung</h2>
+    <p class="lede" id="report-lede"></p>
+    <ol class="rank" id="rank"></ol>
+    <div class="sheet-actions">
+      <button id="copy" class="primary">Als Text kopieren</button>
+      <button id="close-report">Zur&#xfc;ck zur Eingabe</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // -- Data ---------------------------------------------------------------
+  const CRITERIA = [
+    { name: 'Dienstplan',                   short: 'Dienstplan' },
+    { name: 'Angebote',                     short: 'Angebote' },
+    { name: 'Ausfl\u00fcge',                     short: 'Ausfl\u00fcge' },
+    { name: 'Informationsfluss',            short: 'Infofluss' },
+    { name: 'Zusammenarbeit im Team',       short: 'Team' },
+    { name: 'Zusammenarbeit Team/Leitung',  short: 'Team/Leitung' },
+    { name: 'Tagesverantwortlich',          short: 'Tagesverantw.' },
+    { name: 'Externe Unterst\u00fctzung',        short: 'Externe' },
+    { name: 'Raummanagement',               short: 'R\u00e4ume' }
+  ];
+
+  // Quadrants follow the importance\u2013performance reading: what matters and
+  // went badly is where the team should spend its next effort.
+  const QUAD = {
+    act:  { cls: 'is-act',  label: 'Hier ansetzen' },
+    keep: { cls: 'is-keep', label: 'St\u00e4rke sichern' },
+    over: { cls: 'is-over', label: 'Nebenschauplatz' },
+    low:  { cls: 'is-low',  label: 'Geringe Priorit\u00e4t' }
+  };
+
+  const STORE = 'ferien-koordinaten/v1';
+  const MID = 5;
+  const SNAP = 0.5;
+
+  const state = {
+    votes: CRITERIA.map(() => []),
+    active: 0,
+    showVotes: false,
+    showLabels: true
+  };
+  let history = [];
+
+  // -- Geometry -----------------------------------------------------------
+  const VB = 840, PAD = { l: 84, r: 34, t: 34, b: 84 };
+  const X0 = PAD.l, X1 = VB - PAD.r, Y0 = PAD.t, Y1 = VB - PAD.b;
+  const W = X1 - X0, H = Y1 - Y0;
+
+  const sx = v => X0 + (v / 10) * W;
+  const sy = v => Y1 - (v / 10) * H;
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const snap = v => Math.round(clamp(v, 0, 10) / SNAP) * SNAP;
+  const fmt = v => (Math.round(v * 10) / 10).toString().replace('.', ',');
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs = {}) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  };
+
+  const $ = id => document.getElementById(id);
+  const plot = $('plot');
+
+  // -- Derived values -----------------------------------------------------
+  const mean = votes => votes.reduce(
+    (a, v) => ({ x: a.x + v.x / votes.length, y: a.y + v.y / votes.length }),
+    { x: 0, y: 0 }
+  );
+
+  const spread = (votes, m) => votes.length < 2 ? 0 :
+    votes.reduce((a, v) => a + Math.hypot(v.x - m.x, v.y - m.y), 0) / votes.length;
+
+  const quadOf = m =>
+    m.x >= MID ? (m.y >= MID ? 'keep' : 'act')
+               : (m.y >= MID ? 'over' : 'low');
+
+  // Ranking weight: important and unsatisfying rises to the top.
+  const urgency = m => m.x * (10 - m.y);
+
+  const summary = () => CRITERIA.map((c, i) => {
+    const votes = state.votes[i];
+    if (!votes.length) return null;
+    const m = mean(votes);
+    return { i, name: c.name, short: c.short, m, quad: quadOf(m),
+             n: votes.length, sd: spread(votes, m), rank: urgency(m) };
+  }).filter(Boolean);
+
+  // -- Static chart furniture ---------------------------------------------
+  function drawFrame() {
+    const g = el('g');
+
+    g.appendChild(el('rect', { x: X0, y: Y0, width: W, height: H, class: 'plot-frame', rx: 4 }));
+
+    const mx = sx(MID), my = sy(MID);
+    const quads = [
+      ['q-keep', mx, Y0, X1 - mx, my - Y0],
+      ['q-act',  mx, my, X1 - mx, Y1 - my],
+      ['q-over', X0, Y0, mx - X0, my - Y0],
+      ['q-low',  X0, my, mx - X0, Y1 - my]
+    ];
+    for (const [cls, x, y, w, h] of quads) g.appendChild(el('rect', { class: cls, x, y, width: w, height: h }));
+
+    for (let v = 0; v <= 10; v++) {
+      const major = v === 0 || v === 5 || v === 10;
+      const cls = major ? 'grid-major' : 'grid-line';
+      g.appendChild(el('line', { class: cls, x1: sx(v), y1: Y0, x2: sx(v), y2: Y1 }));
+      g.appendChild(el('line', { class: cls, x1: X0, y1: sy(v), x2: X1, y2: sy(v) }));
+
+      const t1 = el('text', { class: 'tick', x: sx(v), y: Y1 + 26, 'text-anchor': 'middle' });
+      t1.textContent = v;
+      g.appendChild(t1);
+
+      const t2 = el('text', { class: 'tick', x: X0 - 14, y: sy(v) + 5, 'text-anchor': 'end' });
+      t2.textContent = v;
+      g.appendChild(t2);
+    }
+
+    g.appendChild(el('line', { class: 'axis-line', x1: X0, y1: Y1, x2: X1, y2: Y1 }));
+    g.appendChild(el('line', { class: 'axis-line', x1: X0, y1: Y0, x2: X0, y2: Y1 }));
+
+    const caps = [
+      ['St\u00e4rke sichern',    X1 - 14, Y0 + 26,  'end'],
+      ['Hier ansetzen',     X1 - 14, Y1 - 14,  'end'],
+      ['Nebenschauplatz',   X0 + 14, Y0 + 26,  'start'],
+      ['Geringe Priorit\u00e4t', X0 + 14, Y1 - 14,  'start']
+    ];
+    for (const [txt, x, y, anchor] of caps) {
+      const t = el('text', { class: 'quad-cap', x, y, 'text-anchor': anchor });
+      t.textContent = txt;
+      g.appendChild(t);
+    }
+
+    const xt = el('text', { class: 'axis-title', x: X0 + W / 2, y: VB - 22, 'text-anchor': 'middle' });
+    xt.textContent = 'Wie wichtig war es f\u00fcr meine Arbeit \u2192';
+    g.appendChild(xt);
+
+    const yt = el('text', { class: 'axis-title', x: 24, y: Y0 + H / 2, 'text-anchor': 'middle',
+                            transform: `rotate(-90 24 ${Y0 + H / 2})` });
+    yt.textContent = 'Wie gut hat es geklappt \u2192';
+    g.appendChild(yt);
+
+    const anchors = [
+      ['unwichtig',    X0 + 2,  Y1 + 46, 'start', null],
+      ['sehr wichtig', X1 - 2,  Y1 + 46, 'end',   null],
+      ['gar nicht',    54,      Y1 - 2,  'start', `rotate(-90 54 ${Y1 - 2})`],
+      ['sehr gut',     54,      Y0 + 2,  'end',   `rotate(-90 54 ${Y0 + 2})`]
+    ];
+    for (const [txt, x, y, anchor, tr] of anchors) {
+      const a = { class: 'axis-anchor', x, y, 'text-anchor': anchor };
+      if (tr) a.transform = tr;
+      const t = el('text', a);
+      t.textContent = txt;
+      g.appendChild(t);
+    }
+
+    plot.appendChild(g);
+  }
+
+  // -- Marks --------------------------------------------------------------
+  const marksLayer = el('g');
+
+  function drawMarks() {
+    marksLayer.textContent = '';
+    const rows = summary();
+    const placed = [];
+
+    for (const r of rows) {
+      const cls = QUAD[r.quad].cls;
+      const cx = sx(r.m.x), cy = sy(r.m.y);
+      const isActive = r.i === state.active;
+      const g = el('g', { class: `mark ${cls}${isActive ? ' active' : ''}`, 'data-i': r.i });
+
+      if (r.sd > 0.3) {
+        g.appendChild(el('circle', { class: 'halo', cx, cy, r: Math.min(96, (r.sd / 10) * W + 14) }));
+      }
+
+      if (state.showVotes || isActive) {
+        for (const v of state.votes[r.i]) {
+          const vx = sx(v.x), vy = sy(v.y);
+          if (Math.hypot(vx - cx, vy - cy) > 6) {
+            g.appendChild(el('line', { class: 'leader', x1: cx, y1: cy, x2: vx, y2: vy }));
+          }
+          g.appendChild(el('circle', { class: 'vote', cx: vx, cy: vy, r: 6 }));
+        }
+      }
+
+      g.appendChild(el('circle', { class: 'dot', cx, cy, r: 17 }));
+
+      const b = el('text', { class: `badge ${cls}`, x: cx, y: cy + 5.5 });
+      b.textContent = r.i + 1;
+      g.appendChild(b);
+
+      marksLayer.appendChild(g);
+
+      if (state.showLabels) {
+        const left = cx > X1 - 190;
+        placed.push({ r, cx, cy, left, g,
+                      w: r.short.length * 8.6 + 52,
+                      y: cy + 5 });
+      }
+    }
+
+    // Nudge labels apart so nine names stay readable at a distance.
+    placed.sort((a, b) => a.y - b.y);
+    for (let pass = 0; pass < 4; pass++) {
+      for (let i = 1; i < placed.length; i++) {
+        const a = placed[i - 1], b = placed[i];
+        const ax0 = a.left ? a.cx - 26 - a.w : a.cx + 26;
+        const bx0 = b.left ? b.cx - 26 - b.w : b.cx + 26;
+        const overlapX = ax0 < bx0 + b.w && bx0 < ax0 + a.w;
+        const gap = b.y - a.y;
+        if (overlapX && gap < 22) {
+          const push = (22 - gap) / 2;
+          a.y -= push;
+          b.y += push;
+        }
+      }
+    }
+
+    for (const p of placed) {
+      const x = p.left ? p.cx - 26 : p.cx + 26;
+      const t = el('text', { class: 'label', x, y: clamp(p.y, Y0 + 14, Y1 - 8),
+                             'text-anchor': p.left ? 'end' : 'start' });
+      t.textContent = p.r.short + ' ';
+      const v = el('tspan', { class: 'val' });
+      v.textContent = `${fmt(p.r.m.x)} / ${fmt(p.r.m.y)}`;
+      t.appendChild(v);
+      p.g.appendChild(t);
+
+      if (Math.abs(p.y - p.cy) > 14) {
+        p.g.insertBefore(el('line', {
+          class: 'leader', x1: p.cx + (p.left ? -20 : 20), y1: p.cy,
+          x2: x + (p.left ? 4 : -4), y2: clamp(p.y, Y0 + 14, Y1 - 8) - 5
+        }), p.g.firstChild);
+      }
+    }
+  }
+
+  // -- Rail + chrome ------------------------------------------------------
+  const critsEl = $('crits');
+
+  function drawRail() {
+    critsEl.textContent = '';
+    CRITERIA.forEach((c, i) => {
+      const votes = state.votes[i];
+      const done = votes.length > 0;
+      const m = done ? mean(votes) : null;
+      const quad = done ? quadOf(m) : null;
+
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.className = 'crit' + (done ? ' done' : '');
+      btn.setAttribute('aria-current', i === state.active ? 'true' : 'false');
+      btn.dataset.i = i;
+
+      const num = document.createElement('span');
+      num.className = 'num' + (done ? ' ' + QUAD[quad].cls : '');
+      num.textContent = i + 1;
+
+      const body = document.createElement('span');
+      body.className = 'body';
+      const nm = document.createElement('span');
+      nm.className = 'name';
+      nm.textContent = c.name;
+      const meta = document.createElement('span');
+      meta.className = 'meta';
+      meta.textContent = done
+        ? `wichtig ${fmt(m.x)} \u00b7 geklappt ${fmt(m.y)}` +
+          (votes.length > 1 ? ` \u00b7 ${votes.length} Stimmen` : '')
+        : 'noch offen';
+      body.append(nm, meta);
+
+      const clear = document.createElement('button');
+      clear.className = 'clear';
+      clear.dataset.clear = i;
+      clear.title = 'Eingaben zu diesem Kriterium l\u00f6schen';
+      clear.setAttribute('aria-label', `${c.name} zur\u00fccksetzen`);
+      clear.textContent = '\u2715';
+
+      btn.append(num, body, clear);
+      li.appendChild(btn);
+      critsEl.appendChild(li);
+    });
+  }
+
+  function drawChrome() {
+    const done = state.votes.filter(v => v.length).length;
+    const total = state.votes.reduce((a, v) => a + v.length, 0);
+    $('count').innerHTML = `<b>${done}</b> von ${CRITERIA.length} bewertet` +
+      (total > done ? ` \u00b7 ${total} Stimmen` : '');
+
+    const name = CRITERIA[state.active].name;
+    const n = state.votes[state.active].length;
+    $('hint').innerHTML = n
+      ? `<b>${name}</b> \u2014 nochmal tippen f\u00fcr eine weitere Stimme, Punkt ziehen zum Korrigieren.`
+      : `<b>${name}</b> \u2014 in die Fl\u00e4che tippen, um den Punkt zu setzen.`;
+
+    $('undo').disabled = history.length === 0;
+    $('t-votes').setAttribute('aria-pressed', String(state.showVotes));
+    $('t-labels').setAttribute('aria-pressed', String(state.showLabels));
+  }
+
+  function render() { drawMarks(); drawRail(); drawChrome(); save(); }
+
+  // -- Mutations ----------------------------------------------------------
+  function snapshot() {
+    history.push(JSON.stringify(state.votes));
+    if (history.length > 60) history.shift();
+  }
+
+  function undo() {
+    const prev = history.pop();
+    if (!prev) return;
+    state.votes = JSON.parse(prev);
+    render();
+  }
+
+  function addVote(i, x, y) {
+    snapshot();
+    state.votes[i].push({ x: snap(x), y: snap(y) });
+    // Move on to the next open criterion, but only on the first entry, so
+    // collecting several opinions on one criterion stays put.
+    if (state.votes[i].length === 1) {
+      const next = state.votes.findIndex(v => v.length === 0);
+      if (next !== -1) state.active = next;
+    }
+    render();
+  }
+
+  function setActive(i) { state.active = i; render(); }
+
+  function clearCrit(i) { snapshot(); state.votes[i] = []; state.active = i; render(); }
+
+  function save() {
+    try {
+      localStorage.setItem(STORE, JSON.stringify({ votes: state.votes }));
+    } catch (e) { /* private mode or sandboxed storage \u2014 session still works */ }
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORE);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.votes) && data.votes.length === CRITERIA.length) {
+        state.votes = data.votes.map(v => Array.isArray(v)
+          ? v.filter(p => typeof p?.x === 'number' && typeof p?.y === 'number')
+             .map(p => ({ x: snap(p.x), y: snap(p.y) }))
+          : []);
+        const next = state.votes.findIndex(v => v.length === 0);
+        state.active = next === -1 ? 0 : next;
+      }
+    } catch (e) { /* ignore unreadable state */ }
+  }
+
+  // -- Pointer handling ---------------------------------------------------
+  function toData(evt) {
+    const ctm = plot.getScreenCTM();
+    if (!ctm) return null;
+    const pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(ctm.inverse());
+    return { x: ((pt.x - X0) / W) * 10, y: ((Y1 - pt.y) / H) * 10, px: pt.x, py: pt.y };
+  }
+
+  let drag = null;
+
+  plot.addEventListener('pointerdown', evt => {
+    const p = toData(evt);
+    if (!p) return;
+
+    const markEl = evt.target.closest('.mark');
+    if (markEl) {
+      const i = Number(markEl.dataset.i);
+      snapshot();
+      const m = mean(state.votes[i]);
+      drag = { i, dx: p.x - m.x, dy: p.y - m.y, moved: false, base: state.votes[i].map(v => ({ ...v })) };
+      state.active = i;
+      markEl.classList.add('dragging');
+      plot.setPointerCapture(evt.pointerId);
+      render();
+      return;
+    }
+
+    if (p.px < X0 - 12 || p.px > X1 + 12 || p.py < Y0 - 12 || p.py > Y1 + 12) return;
+    drag = { pending: true, x: p.x, y: p.y, sx: evt.clientX, sy: evt.clientY };
+    plot.setPointerCapture(evt.pointerId);
+  });
+
+  plot.addEventListener('pointermove', evt => {
+    if (!drag || drag.pending) {
+      if (drag && Math.hypot(evt.clientX - drag.sx, evt.clientY - drag.sy) > 10) drag = null;
+      return;
+    }
+    const p = toData(evt);
+    if (!p) return;
+    drag.moved = true;
+
+    // Translate the whole cluster so several opinions keep their spread.
+    const m0 = mean(drag.base);
+    const tx = clamp(p.x - drag.dx, 0, 10) - m0.x;
+    const ty = clamp(p.y - drag.dy, 0, 10) - m0.y;
+    state.votes[drag.i] = drag.base.map(v => ({
+      x: snap(clamp(v.x + tx, 0, 10)),
+      y: snap(clamp(v.y + ty, 0, 10))
+    }));
+    drawMarks();
+    drawChrome();
+  });
+
+  function endDrag(evt) {
+    if (!drag) return;
+    if (drag.pending) {
+      const moved = Math.hypot(evt.clientX - drag.sx, evt.clientY - drag.sy);
+      if (moved <= 10) addVote(state.active, drag.x, drag.y);
+    } else {
+      if (!drag.moved) history.pop();   // a tap that never moved is not an edit
+      render();
+    }
+    drag = null;
+    plot.querySelectorAll('.dragging').forEach(n => n.classList.remove('dragging'));
+  }
+
+  plot.addEventListener('pointerup', endDrag);
+  plot.addEventListener('pointercancel', () => {
+    if (drag && !drag.pending) { history.pop(); render(); }
+    drag = null;
+  });
+
+  // -- Rail interaction ---------------------------------------------------
+  critsEl.addEventListener('click', evt => {
+    const clr = evt.target.closest('[data-clear]');
+    if (clr) { evt.stopPropagation(); clearCrit(Number(clr.dataset.clear)); return; }
+    const btn = evt.target.closest('.crit');
+    if (btn) setActive(Number(btn.dataset.i));
+  });
+
+  // -- Report -------------------------------------------------------------
+  function reportText() {
+    const rows = summary().sort((a, b) => b.rank - a.rank);
+    const lines = ['Ferien-Koordinaten \u2014 R\u00fcckblick Ferienbetreuung', ''];
+    if (!rows.length) return lines.concat('Noch keine Eingaben.').join('\n');
+    lines.push('Kriterium | wichtig | geklappt | Einordnung | Stimmen');
+    for (const r of rows) {
+      lines.push(`${r.name} | ${fmt(r.m.x)} | ${fmt(r.m.y)} | ${QUAD[r.quad].label} | ${r.n}`);
+    }
+    const open = CRITERIA.filter((_, i) => !state.votes[i].length).map(c => c.name);
+    if (open.length) lines.push('', 'Noch offen: ' + open.join(', '));
+    return lines.join('\n');
+  }
+
+  function openReport() {
+    const rows = summary().sort((a, b) => b.rank - a.rank);
+    const rank = $('rank');
+    rank.textContent = '';
+
+    const act = rows.filter(r => r.quad === 'act').length;
+    $('report-lede').textContent = rows.length
+      ? (act
+          ? `${act} von ${rows.length} bewerteten Kriterien liegen im Feld \u201eHier ansetzen\u201c \u2014 wichtig f\u00fcr die Arbeit, aber noch nicht rund gelaufen. Sortiert nach Dringlichkeit.`
+          : 'Kein Kriterium liegt im Feld \u201eHier ansetzen\u201c. Sortiert nach Dringlichkeit.')
+      : 'Sobald Punkte gesetzt sind, erscheint hier die Rangfolge.';
+
+    if (!rows.length) {
+      const p = document.createElement('p');
+      p.className = 'empty';
+      p.textContent = 'Noch keine Eingaben.';
+      rank.appendChild(p);
+    }
+
+    rows.forEach((r, n) => {
+      const li = document.createElement('li');
+
+      const pos = document.createElement('span');
+      pos.className = 'pos';
+      pos.textContent = n + 1;
+
+      const body = document.createElement('span');
+      const nm = document.createElement('span');
+      nm.className = 'nm';
+      nm.textContent = r.name;
+      const sub = document.createElement('span');
+      sub.className = 'sub';
+      sub.textContent = `wichtig ${fmt(r.m.x)} \u00b7 geklappt ${fmt(r.m.y)}` +
+        (r.n > 1 ? ` \u00b7 ${r.n} Stimmen` : '') +
+        (r.sd > 1.6 ? ' \u00b7 Team uneinig' : '');
+      body.append(nm, sub);
+
+      const chip = document.createElement('span');
+      chip.className = 'chip ' + QUAD[r.quad].cls;
+      chip.textContent = QUAD[r.quad].label;
+
+      li.append(pos, body, chip);
+      rank.appendChild(li);
+    });
+
+    $('report').hidden = false;
+    $('close-report').focus();
+  }
+
+  $('open-report').addEventListener('click', openReport);
+  $('close-report').addEventListener('click', () => { $('report').hidden = true; });
+  $('report').addEventListener('click', evt => {
+    if (evt.target === $('report')) $('report').hidden = true;
+  });
+
+  $('copy').addEventListener('click', async evt => {
+    const btn = evt.currentTarget;
+    const text = reportText();
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+      ta.remove();
+    }
+    btn.textContent = ok ? 'Kopiert' : 'Kopieren nicht m\u00f6glich';
+    setTimeout(() => { btn.textContent = 'Als Text kopieren'; }, 1800);
+  });
+
+  // -- Toolbar ------------------------------------------------------------
+  $('undo').addEventListener('click', undo);
+  $('t-votes').addEventListener('click', () => { state.showVotes = !state.showVotes; render(); });
+  $('t-labels').addEventListener('click', () => { state.showLabels = !state.showLabels; render(); });
+  $('reset').addEventListener('click', () => {
+    if (!state.votes.some(v => v.length)) return;
+    if (!confirm('Alle Eingaben l\u00f6schen und neu beginnen?')) return;
+    snapshot();
+    state.votes = CRITERIA.map(() => []);
+    state.active = 0;
+    render();
+  });
+
+  document.addEventListener('keydown', evt => {
+    if (evt.target.matches('input, textarea')) return;
+    if (evt.key === 'Escape') { $('report').hidden = true; return; }
+    if ((evt.metaKey || evt.ctrlKey) && evt.key === 'z') { evt.preventDefault(); undo(); return; }
+    if (/^[1-9]$/.test(evt.key)) setActive(Number(evt.key) - 1);
+  });
+
+  // -- Go -----------------------------------------------------------------
+  load();
+  drawFrame();
+  plot.appendChild(marksLayer);
+  render();
+})();
+</script>
